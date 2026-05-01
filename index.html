@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能物品使用情况管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 25px 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            color: #1f2937;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        header p {
+            color: #4b5563;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #4f46e5;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        .filter-bar {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: #4b5563;
+        }
+
+        .category-btn.active,
+        .category-btn:hover {
+            background: rgba(79, 70, 229, 0.9);
+            border-color: rgba(79, 70, 229, 0.9);
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: rgba(79, 70, 229, 0.2);
+            color: #4f46e5;
+            border-color: rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: rgba(79, 70, 229, 0.9);
+            color: white;
+            border-color: rgba(79, 70, 229, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(107, 114, 128, 0.1);
+            color: #4b5563;
+            border-color: rgba(107, 114, 128, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(107, 114, 128, 0.3);
+        }
+
+        .btn-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            border-color: rgba(16, 185, 129, 0.9);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 22px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            border-left: 4px solid #4f46e5;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .item-card.expiring {
+            background: rgba(255, 245, 245, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-left-color: #ef4444;
+        }
+
+        .item-card.expired {
+            background: rgba(254, 242, 242, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-left-color: #dc2626;
+        }
+
+        .item-card.low-stock {
+            background: rgba(255, 251, 235, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-left-color: #f59e0b;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .item-category {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .category-daily { background: #dbeafe; color: #2563eb; }
+        .category-food { background: #dcfce7; color: #16a34a; }
+        .category-clothes { background: #fce7f3; color: #db2777; }
+        .category-electronic { background: #e0e7ff; color: #6366f1; }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn.edit { color: #4b5563; }
+        .action-btn.edit:hover { background: rgba(107, 114, 128, 0.3); }
+        .action-btn.delete { color: #ef4444; }
+        .action-btn.delete:hover { background: rgba(239, 68, 68, 0.2); }
+
+        .item-info {
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #94a3b8;
+        }
+
+        .info-value {
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .qty-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(79, 70, 229, 0.4);
+            background: rgba(79, 70, 229, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 10px;
+            font-size: 20px;
+            color: #4f46e5;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .qty-btn:hover {
+            background: rgba(79, 70, 229, 0.9);
+            color: white;
+            border-color: rgba(79, 70, 229, 0.9);
+        }
+
+        .qty-display {
+            min-width: 60px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .consume-btn {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.15);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            color: #ef4444;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .consume-btn:hover {
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border-color: rgba(239, 68, 68, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .badge-info {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .note-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .note-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .note-content {
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .note-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .note-image {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .note-image:hover {
+            transform: scale(1.05);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal h2 {
+            color: #1f2937;
+            font-size: 22px;
+        }
+
+        .close-modal {
+            width: 35px;
+            height: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4b5563;
+        }
+
+        .close-modal:hover {
+            background: rgba(107, 114, 128, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #475569;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            outline: none;
+            color: #374151;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: rgba(79, 70, 229, 0.5);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .category-fields {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            margin-bottom: 15px;
+        }
+
+        .category-fields h4 {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .image-upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .image-upload-area:hover,
+        .image-upload-area.dragover {
+            border-color: #6366f1;
+            background: #f0f1ff;
+        }
+
+        .image-upload-area svg {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+            color: #94a3b8;
+        }
+
+        .image-upload-area p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preview-item {
+            position: relative;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .form-actions .btn {
+            flex: 1;
+        }
+
+        .btn-cancel {
+            background: rgba(107, 114, 128, 0.15);
+            color: #4b5563;
+            border-color: rgba(107, 114, 128, 0.2);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(107, 114, 128, 0.3);
+        }
+
+        .import-area {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px dashed rgba(16, 185, 129, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .import-area.active {
+            display: block;
+        }
+
+        .import-area svg {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+            color: #22c55e;
+        }
+
+        .import-area p {
+            color: #16a34a;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 22px;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                flex-wrap: wrap;
+            }
+
+            .category-btn {
+                flex: 1;
+                min-width: calc(50% - 5px);
+            }
+
+            .action-buttons {
+                width: 100%;
+            }
+
+            .action-buttons .btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>智能物品使用情况管理系统</h1>
+            <p>高效管理家中各类物品，智能提醒与统计</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value" id="total-items">0</div>
+                <div class="stat-label">物品总数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="expiring-items">0</div>
+                <div class="stat-label">即将过期</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="low-stock-items">0</div>
+                <div class="stat-label">需要补货</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-cost">¥0</div>
+                <div class="stat-label">衣服/电子总花费</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <button class="category-btn active" data-category="all">全部</button>
+                <button class="category-btn" data-category="日用品">日用品</button>
+                <button class="category-btn" data-category="食品">食品</button>
+                <button class="category-btn" data-category="衣服">衣服</button>
+                <button class="category-btn" data-category="电子产品">电子产品</button>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="openAddModal()">添加物品</button>
+                <button class="btn btn-secondary" onclick="toggleImportArea()">导入/导出</button>
+            </div>
+        </div>
+
+        <div class="import-area" id="import-area">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <p>点击或拖拽 JSON 文件到此处导入数据</p>
+            <input type="file" id="import-file" accept=".json" style="display:none">
+            <button class="btn btn-success" style="margin-top:15px" onclick="exportData()">导出数据</button>
+        </div>
+
+        <div class="main-content" id="item-list">
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <h3>暂无物品</h3>
+                <p>点击上方「添加物品」按钮开始管理</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="item-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">添加物品</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="item-form">
+                <input type="hidden" id="item-id">
+                
+                <div class="form-group">
+                    <label for="item-name">物品名称 *</label>
+                    <input type="text" id="item-name" placeholder="请输入物品名称" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="item-category">品类 *</label>
+                    <select id="item-category" required>
+                        <option value="">请选择品类</option>
+                        <option value="日用品">日用品</option>
+                        <option value="食品">食品</option>
+                        <option value="衣服">衣服</option>
+                        <option value="电子产品">电子产品</option>
+                    </select>
+                </div>
+
+                <div class="category-fields" id="stock-fields" style="display:none;">
+                    <h4>库存与保质期</h4>
+                    <div class="form-group">
+                        <label for="item-quantity">数量 *</label>
+                        <input type="number" id="item-quantity" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-production-date">生产日期 *</label>
+                        <input type="date" id="item-production-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-shelf-life">保质期天数 *</label>
+                        <input type="number" id="item-shelf-life" min="1" value="30" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-min-stock">最低库存提醒值 *</label>
+                        <input type="number" id="item-min-stock" min="1" value="2" required>
+                    </div>
+                </div>
+
+                <div class="category-fields" id="cost-fields" style="display:none;">
+                    <h4>购买信息</h4>
+                    <div class="form-group">
+                        <label for="item-purchase-date">购买日期 *</label>
+                        <input type="date" id="item-purchase-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-cost">购买费用（元）*</label>
+                        <input type="number" id="item-cost" min="0" step="0.01" value="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="item-note">备注</label>
+                    <textarea id="item-note" placeholder="添加备注信息..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>备注图片</label>
+                    <div class="image-upload-area" id="image-upload" onclick="document.getElementById('image-input').click()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <p>点击上传图片（单张不超过2MB）</p>
+                    </div>
+                    <input type="file" id="image-input" accept="image/*" multiple style="display:none" onchange="handleImageUpload(this)">
+                    <div class="image-preview" id="image-preview"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="image-modal">
+        <div class="modal" style="max-width: 90vw; max-height: 90vh; padding: 10px; background: rgba(0,0,0,0.8);">
+            <button class="close-modal" style="position: absolute; top: 10px; right: 10px; z-index: 10; background: rgba(255,255,255,0.2); color: white;" onclick="closeImageModal()">&times;</button>
+            <img id="preview-image" src="" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 8px;">
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'smart-item-management';
+        let items = [];
+        let currentCategory = 'all';
+        let editingItem = null;
+        let noteImages = [];
+
+        function loadItems() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                items = JSON.parse(stored);
+            } else {
+                items = [];
+            }
+        }
+
+        function saveItems() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        }
+
+        function calculateExpiryDate(productionDate, shelfLife) {
+            const date = new Date(productionDate);
+            date.setDate(date.getDate() + parseInt(shelfLife));
+            return date.toISOString().split('T')[0];
+        }
+
+        function getDaysUntilExpiry(expiryDate) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const expiry = new Date(expiryDate);
+            expiry.setHours(0, 0, 0, 0);
+            const diffTime = expiry - today;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function getDaysUsed(purchaseDate) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const purchase = new Date(purchaseDate);
+            purchase.setHours(0, 0, 0, 0);
+            const diffTime = today - purchase;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function isExpiringSoon(item) {
+            if (!item.expiryDate) return false;
+            const days = getDaysUntilExpiry(item.expiryDate);
+            return days <= 7 && days > 0;
+        }
+
+        function isExpired(item) {
+            if (!item.expiryDate) return false;
+            return getDaysUntilExpiry(item.expiryDate) <= 0;
+        }
+
+        function isLowStock(item) {
+            if (!item.minStock) return false;
+            return item.quantity <= item.minStock;
+        }
+
+        function updateStats() {
+            const total = items.length;
+            const expiring = items.filter(item => isExpiringSoon(item) || isExpired(item)).length;
+            const lowStock = items.filter(item => isLowStock(item)).length;
+            const costItems = items.filter(item => item.category === '衣服' || item.category === '电子产品');
+            const totalCost = costItems.reduce((sum, item) => sum + (item.cost || 0), 0);
+
+            document.getElementById('total-items').textContent = total;
+            document.getElementById('expiring-items').textContent = expiring;
+            document.getElementById('low-stock-items').textContent = lowStock;
+            document.getElementById('total-cost').textContent = '¥' + totalCost.toFixed(2);
+        }
+
+        function renderItems() {
+            const list = document.getElementById('item-list');
+            const filteredItems = currentCategory === 'all' 
+                ? items 
+                : items.filter(item => item.category === currentCategory);
+
+            if (filteredItems.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        <h3>暂无物品</h3>
+                        <p>点击上方「添加物品」按钮开始管理</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = filteredItems.map(item => {
+                const expiring = isExpiringSoon(item);
+                const expired = isExpired(item);
+                const lowStock = isLowStock(item);
+
+                let cardClass = '';
+                if (expired) cardClass = 'expired';
+                else if (expiring) cardClass = 'expiring';
+                if (lowStock && !expired) cardClass += ' low-stock';
+
+                let categoryClass = '';
+                switch(item.category) {
+                    case '日用品': categoryClass = 'category-daily'; break;
+                    case '食品': categoryClass = 'category-food'; break;
+                    case '衣服': categoryClass = 'category-clothes'; break;
+                    case '电子产品': categoryClass = 'category-electronic'; break;
+                }
+
+                let badges = '';
+                if (expired) {
+                    badges += '<span class="badge badge-danger">已过期</span>';
+                } else if (expiring) {
+                    badges += `<span class="badge badge-danger">${getDaysUntilExpiry(item.expiryDate)}天后过期</span>`;
+                }
+                if (lowStock && (item.category === '日用品' || item.category === '食品')) {
+                    badges += `<span class="badge badge-warning">库存不足</span>`;
+                }
+
+                let content = '';
+                if (item.category === '日用品' || item.category === '食品') {
+                    content = `
+                        <div class="info-row">
+                            <span class="info-label">生产日期</span>
+                            <span class="info-value">${item.productionDate}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">到期日期</span>
+                            <span class="info-value">${item.expiryDate}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">保质期</span>
+                            <span class="info-value">${item.shelfLife}天</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">最低库存</span>
+                            <span class="info-value">${item.minStock}</span>
+                        </div>
+                        <div class="quantity-control">
+                            <button class="qty-btn" onclick="adjustQuantity('${item.id}', -1)">-</button>
+                            <div class="qty-display">${item.quantity}</div>
+                            <button class="qty-btn" onclick="adjustQuantity('${item.id}', 1)">+</button>
+                        </div>
+                        <button class="consume-btn" onclick="consumeItem('${item.id}')">使用/消耗</button>
+                    `;
+                } else {
+                    content = `
+                        <div class="info-row">
+                            <span class="info-label">购买日期</span>
+                            <span class="info-value">${item.purchaseDate}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">购买费用</span>
+                            <span class="info-value">¥${item.cost.toFixed(2)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">已使用</span>
+                            <span class="info-value">${getDaysUsed(item.purchaseDate)}天</span>
+                        </div>
+                    `;
+                }
+
+                let noteSection = '';
+                if (item.note || (item.images && item.images.length > 0)) {
+                    noteSection = `
+                        <div class="note-section">
+                            <div class="note-title">备注</div>
+                            ${item.note ? `<div class="note-content">${item.note}</div>` : ''}
+                            ${item.images && item.images.length > 0 ? `
+                                <div class="note-images">
+                                    ${item.images.map((img, idx) => `<img class="note-image" src="${img}" onclick="openImageModal('${img}')" alt="图片${idx+1}">`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="item-card ${cardClass.trim()}">
+                        <div class="item-header">
+                            <div>
+                                <div class="item-name">${item.name}</div>
+                                <span class="item-category ${categoryClass}">${item.category}</span>
+                            </div>
+                            <div class="item-actions">
+                                <button class="action-btn edit" onclick="openEditModal('${item.id}')" title="编辑">✏️</button>
+                                <button class="action-btn delete" onclick="deleteItem('${item.id}')" title="删除">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="item-info">${content}</div>
+                        ${badges ? `<div class="badges">${badges}</div>` : ''}
+                        ${noteSection}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleCategoryChange() {
+            const buttons = document.querySelectorAll('.category-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            currentCategory = event.target.dataset.category;
+            renderItems();
+        }
+
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', handleCategoryChange);
+        });
+
+        function openAddModal() {
+            editingItem = null;
+            noteImages = [];
+            document.getElementById('modal-title').textContent = '添加物品';
+            document.getElementById('item-form').reset();
+            document.getElementById('image-preview').innerHTML = '';
+            document.getElementById('stock-fields').style.display = 'none';
+            document.getElementById('cost-fields').style.display = 'none';
+            
+            const stockFields = document.querySelectorAll('#stock-fields input, #stock-fields select');
+            const costFields = document.querySelectorAll('#cost-fields input, #cost-fields select');
+            stockFields.forEach(f => f.required = false);
+            costFields.forEach(f => f.required = false);
+            
+            document.getElementById('item-modal').classList.add('active');
+        }
+
+        function openEditModal(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            editingItem = item;
+            noteImages = item.images || [];
+            
+            document.getElementById('modal-title').textContent = '编辑物品';
+            document.getElementById('item-id').value = item.id;
+            document.getElementById('item-name').value = item.name;
+            document.getElementById('item-category').value = item.category;
+            document.getElementById('item-note').value = item.note || '';
+
+            const stockFields = document.querySelectorAll('#stock-fields input, #stock-fields select');
+            const costFields = document.querySelectorAll('#cost-fields input, #cost-fields select');
+
+            if (item.category === '日用品' || item.category === '食品') {
+                document.getElementById('stock-fields').style.display = 'block';
+                document.getElementById('cost-fields').style.display = 'none';
+                stockFields.forEach(f => f.required = true);
+                costFields.forEach(f => f.required = false);
+                
+                document.getElementById('item-quantity').value = item.quantity;
+                document.getElementById('item-production-date').value = item.productionDate;
+                document.getElementById('item-shelf-life').value = item.shelfLife;
+                document.getElementById('item-min-stock').value = item.minStock;
+            } else {
+                document.getElementById('stock-fields').style.display = 'none';
+                document.getElementById('cost-fields').style.display = 'block';
+                stockFields.forEach(f => f.required = false);
+                costFields.forEach(f => f.required = true);
+                
+                document.getElementById('item-purchase-date').value = item.purchaseDate;
+                document.getElementById('item-cost').value = item.cost;
+            }
+
+            const preview = document.getElementById('image-preview');
+            preview.innerHTML = noteImages.map((img, idx) => `
+                <div class="preview-item">
+                    <img src="${img}" alt="图片${idx+1}">
+                    <button class="remove-image" onclick="removeNoteImage(${idx})">×</button>
+                </div>
+            `).join('');
+
+            document.getElementById('item-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('item-modal').classList.remove('active');
+            editingItem = null;
+            noteImages = [];
+        }
+
+        function handleCategorySelect() {
+            const category = document.getElementById('item-category').value;
+            
+            const stockFields = document.querySelectorAll('#stock-fields input, #stock-fields select');
+            const costFields = document.querySelectorAll('#cost-fields input, #cost-fields select');
+            
+            if (category === '日用品' || category === '食品') {
+                document.getElementById('stock-fields').style.display = 'block';
+                document.getElementById('cost-fields').style.display = 'none';
+                stockFields.forEach(f => f.required = true);
+                costFields.forEach(f => f.required = false);
+            } else if (category === '衣服' || category === '电子产品') {
+                document.getElementById('stock-fields').style.display = 'none';
+                document.getElementById('cost-fields').style.display = 'block';
+                stockFields.forEach(f => f.required = false);
+                costFields.forEach(f => f.required = true);
+            } else {
+                document.getElementById('stock-fields').style.display = 'none';
+                document.getElementById('cost-fields').style.display = 'none';
+                stockFields.forEach(f => f.required = false);
+                costFields.forEach(f => f.required = false);
+            }
+        }
+
+        document.getElementById('item-category').addEventListener('change', handleCategorySelect);
+
+        function handleImageUpload(input) {
+            const files = input.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('图片大小不能超过2MB');
+                    continue;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    noteImages.push(e.target.result);
+                    const preview = document.getElementById('image-preview');
+                    preview.innerHTML += `
+                        <div class="preview-item">
+                            <img src="${e.target.result}" alt="图片">
+                            <button class="remove-image" onclick="removeNoteImage(${noteImages.length - 1})">×</button>
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+            input.value = '';
+        }
+
+        function removeNoteImage(index) {
+            noteImages.splice(index, 1);
+            const preview = document.getElementById('image-preview');
+            preview.innerHTML = noteImages.map((img, idx) => `
+                <div class="preview-item">
+                    <img src="${img}" alt="图片${idx+1}">
+                    <button class="remove-image" onclick="removeNoteImage(${idx})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function saveItem(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('item-name').value;
+            const category = document.getElementById('item-category').value;
+            const note = document.getElementById('item-note').value;
+
+            let itemData = {
+                id: editingItem ? editingItem.id : Date.now().toString(),
+                name,
+                category,
+                note,
+                images: [...noteImages]
+            };
+
+            if (category === '日用品' || category === '食品') {
+                const quantity = parseInt(document.getElementById('item-quantity').value);
+                const productionDate = document.getElementById('item-production-date').value;
+                const shelfLife = parseInt(document.getElementById('item-shelf-life').value);
+                const minStock = parseInt(document.getElementById('item-min-stock').value);
+                const expiryDate = calculateExpiryDate(productionDate, shelfLife);
+
+                itemData.quantity = quantity;
+                itemData.productionDate = productionDate;
+                itemData.shelfLife = shelfLife;
+                itemData.minStock = minStock;
+                itemData.expiryDate = expiryDate;
+            } else {
+                const purchaseDate = document.getElementById('item-purchase-date').value;
+                const cost = parseFloat(document.getElementById('item-cost').value);
+
+                itemData.purchaseDate = purchaseDate;
+                itemData.cost = cost;
+            }
+
+            if (editingItem) {
+                const index = items.findIndex(i => i.id === editingItem.id);
+                if (index !== -1) {
+                    items[index] = itemData;
+                }
+            } else {
+                items.push(itemData);
+            }
+
+            saveItems();
+            renderItems();
+            updateStats();
+            closeModal();
+        }
+
+        document.getElementById('item-form').addEventListener('submit', saveItem);
+
+        function deleteItem(id) {
+            if (!confirm('确定要删除这个物品吗？')) return;
+            items = items.filter(item => item.id !== id);
+            saveItems();
+            renderItems();
+            updateStats();
+        }
+
+        function adjustQuantity(id, delta) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.quantity = Math.max(0, item.quantity + delta);
+                if (item.quantity === 0) {
+                    deleteItem(id);
+                } else {
+                    saveItems();
+                    renderItems();
+                    updateStats();
+                }
+            }
+        }
+
+        function consumeItem(id) {
+            const item = items.find(i => i.id === id);
+            if (item && item.quantity > 0) {
+                adjustQuantity(id, -1);
+            }
+        }
+
+        function openImageModal(src) {
+            document.getElementById('preview-image').src = src;
+            document.getElementById('image-modal').classList.add('active');
+        }
+
+        function closeImageModal() {
+            document.getElementById('image-modal').classList.remove('active');
+        }
+
+        function toggleImportArea() {
+            const area = document.getElementById('import-area');
+            area.classList.toggle('active');
+        }
+
+        function exportData() {
+            const data = JSON.stringify(items, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `物品数据_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert('数据导出成功！');
+        }
+
+        const importArea = document.getElementById('import-area');
+        const importFile = document.getElementById('import-file');
+
+        importArea.addEventListener('click', () => {
+            importFile.click();
+        });
+
+        importArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            importArea.classList.add('dragover');
+        });
+
+        importArea.addEventListener('dragleave', () => {
+            importArea.classList.remove('dragover');
+        });
+
+        importArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            importArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processImportFile(files[0]);
+            }
+        });
+
+        importFile.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                processImportFile(e.target.files[0]);
+            }
+        });
+
+        function processImportFile(file) {
+            if (!file.name.endsWith('.json')) {
+                alert('请选择 JSON 文件');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        items = [...importedData];
+                        saveItems();
+                        renderItems();
+                        updateStats();
+                        alert('数据导入成功！');
+                    } else {
+                        alert('无效的数据格式');
+                    }
+                } catch (error) {
+                    alert('文件解析失败');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadItems();
+            renderItems();
+            updateStats();
+        });
+    </script>
+</body>
+</html>
